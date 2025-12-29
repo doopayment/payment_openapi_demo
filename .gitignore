@@ -1,0 +1,19 @@
+# General
+.DS_Store
+.idea/
+.vscode/
+*.log
+
+# Java
+target/
+*.class
+
+# Node
+node_modules/
+
+# Python
+__pycache__/
+*.pyc
+
+# PHP
+vendor/

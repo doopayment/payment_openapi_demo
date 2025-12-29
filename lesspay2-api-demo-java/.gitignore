@@ -1,0 +1,52 @@
+target
+.idea
+.settings/
+.metadata/
+*.iml
+.classpath
+.project
+classes/
+lib/
+tmp/
+rebel.xml
+#### 以下是网上找的
+#java
+*.class
+
+#package file
+*.war
+*.ear
+*.zip
+*.tar.gz
+*.rar
+*.iml
+#maven ignore
+target/
+build/
+
+#eclipse ignore
+.settings/
+.project
+.classpatch
+
+#Intellij idea
+.idea/
+/idea/
+*.ipr
+*.iml
+*.iws
+
+# temp file
+*.log
+*.cache
+*.diff
+*.patch
+*.tmp
+
+# system ignore
+.DS_Store
+Thumbs.db
+/qodana.yaml
+.specstory
+.fastRequest
+.cursor

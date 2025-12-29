@@ -1,0 +1,13 @@
+lesspay2:
+  api:
+    # Environment configuration - please modify according to actual environment
+    base-url: https://lesspay2-pay-uat.doopayment.com/
+    # Merchant configuration - please fill in real AppId and AppSecret
+    app-id: YOUR_APP_ID
+    app-secret: YOUR_APP_SECRET
+
+# Logging configuration
+logging:
+  level:
+    com.dpe.lesspay2.demo: DEBUG
+    okhttp3: DEBUG
