@@ -64,6 +64,9 @@ public class PayoutQueryExample {
     /**
      * Execute query request
      */
+    /**
+     * Execute query request
+     */
     private void executeQuery(PayoutQueryDTO dto) throws IOException {
         // 1. Build request
         String jsonBody = JSON.toJSONString(dto);
@@ -96,6 +99,57 @@ public class PayoutQueryExample {
             System.out.println("\n=== HTTP Response ===");
             System.out.println("Status: " + response.code());
             System.out.println("Body: " + responseBody);
+            
+            if (!response.isSuccessful()) {
+                System.out.println("Request failed");
+                return;
+            }
+
+            // 4. Parse response content
+            com.alibaba.fastjson.JSONObject apiRes = JSON.parseObject(responseBody);
+            if (apiRes.getIntValue("code") != 0) {
+                System.out.println("API Error: " + apiRes.getString("msg"));
+                return;
+            }
+
+            com.alibaba.fastjson.JSONObject data = apiRes.getJSONObject("data");
+            System.out.println("\n=== Payout Query Result ===");
+            
+            // Display main order info
+            System.out.println("Platform Main Order ID (pay_order_id): " + data.getString("pay_order_id"));
+            System.out.println("Merchant Request ID (request_id): " + data.getString("request_id"));
+            System.out.println("Order Status (order_status): " + data.getString("order_status"));
+            System.out.println("Currency (currency): " + data.getString("currency"));
+            System.out.println("Total Amount (total_amount): " + data.getString("total_amount"));
+            System.out.println("Decimal Places (decimal_places): " + data.getString("decimal_places"));
+            System.out.println("Failure Reason (fail_reason): " + data.getString("fail_reason"));
+            System.out.println("Creation Time (created_at): " + data.getString("created_at"));
+
+            // Display details
+            com.alibaba.fastjson.JSONArray details = data.getJSONArray("details");
+            if (details != null && !details.isEmpty()) {
+                System.out.println("\n=== Detail List (" + details.size() + ") ===");
+                for (int i = 0; i < details.size(); i++) {
+                    com.alibaba.fastjson.JSONObject detail = details.getJSONObject(i);
+                    System.out.println("\n--- Detail #" + (i + 1) + " ---");
+                    System.out.println("  Detail ID (payout_order_detail_id): " + detail.getString("payout_order_detail_id"));
+                    System.out.println("  Merchant Order ID (mch_order_id): " + detail.getString("mch_order_id"));
+                    System.out.println("  Request Amount (amount): " + detail.getString("amount"));
+                    System.out.println("  Actual Paid (actual_amount): " + detail.getString("actual_amount"));
+                    System.out.println("  Status (status): " + detail.getString("status"));
+                    System.out.println("  Audit State (audit_state): " + detail.getString("audit_state"));
+                    System.out.println("  Fail Reason (fail_reason): " + detail.getString("fail_reason"));
+                    System.out.println("  Reject Reason (rejected_reason): " + detail.getString("rejected_reason"));
+                    System.out.println("  Channel Order No (channel_order_no): " + detail.getString("channel_order_no"));
+                    System.out.println("  Bank Account No (bank_account_no): " + detail.getString("bank_account_no"));
+                    System.out.println("  Account Name (bank_account_name): " + detail.getString("bank_account_name"));
+                    System.out.println("  Account Type (bank_account_type): " + detail.getString("bank_account_type"));
+                    System.out.println("  Bank Name (bank_name): " + detail.getString("bank_name"));
+                    System.out.println("  Country Code (bank_country_code): " + detail.getString("bank_country_code"));
+                    System.out.println("  SWIFT Code (bank_swift_code): " + detail.getString("bank_swift_code"));
+                    System.out.println("  Success Time (success_time): " + detail.getString("success_time"));
+                }
+            }
         }
     }
 
