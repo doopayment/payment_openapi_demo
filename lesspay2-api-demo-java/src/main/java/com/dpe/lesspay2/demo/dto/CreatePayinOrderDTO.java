@@ -125,4 +125,11 @@ public class CreatePayinOrderDTO {
      */
     @JSONField(name = "use_channel_request_id")
     private Boolean useChannelRequestId;
+
+    /**
+     * Channel extra parameters for payment channel
+     * Optional (Required for Card Payment in OpenAPI mode)
+     */
+    @JSONField(name = "channel_extra")
+    private ChannelExtraDTO channelExtra;
 }
