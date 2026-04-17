@@ -1,6 +1,7 @@
 package com.dpe.lesspay2.demo.dto;
 
 import com.alibaba.fastjson.annotation.JSONField;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 import java.util.List;
@@ -76,6 +77,12 @@ public class CreatePayoutOrderDTO {
     private String notifyUrl;
 
     /**
+     * Target customer type, supports type bank/crypto_wallet/ewallet
+     */
+    @JSONField(name = "destination_type")
+    private String destinationType = "bank";
+
+    /**
      * Payout Detail List
      */
     @JSONField(name = "payout_order_details")
@@ -134,5 +141,11 @@ public class CreatePayoutOrderDTO {
          */
         @JSONField(name = "bank_swift_code")
         private String bankSwiftCode;
+
+        @JSONField(name = "e_wallet")
+        @JsonProperty("e_wallet")
+        private PayoutEWalletDTO payoutEWallet;
     }
+
+
 }

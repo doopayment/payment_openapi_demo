@@ -1,9 +1,9 @@
-package com.dpe.lesspay2.demo.example;
+package com.dpe.lesspay2.demo.example.payout;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import com.dpe.lesspay2.demo.dto.CreatePayoutOrderDTO;
 import com.dpe.lesspay2.demo.dto.CreatePayoutOrderDTO.PayoutOrderDetailDTO;
+import com.dpe.lesspay2.demo.dto.PayoutEWalletDTO;
 import com.dpe.lesspay2.demo.util.SignUtil;
 import okhttp3.*;
 import org.junit.jupiter.api.Test;
@@ -15,14 +15,14 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * Payout API Call Example
- * 
+ *
  * Demonstrates how to call the /api/global/payout/batch/create-order endpoint
- * 
+ *
  * Usage:
  * 1. Modify the APP_ID, APP_SECRET, BASE_URL configuration below
  * 2. Run the testPayoutDemo() test method
  */
-public class PayoutExample {
+public class PayoutBatchExample {
 
     // ======== Configuration - Please modify to real values ========
     private static final String APP_ID = "YOUR_APP_ID";
@@ -48,6 +48,51 @@ public class PayoutExample {
 
         // 1. Build request parameters
         CreatePayoutOrderDTO dto = buildPayoutRequest();
+        String jsonBody = JSON.toJSONString(dto);
+        System.out.println("Request Params: " + jsonBody);
+
+        // 2. Generate signature
+        String signature = SignUtil.createSign(JSON.parseObject(jsonBody), APP_SECRET);
+        System.out.println("Generated Signature: " + signature);
+
+        // 3. Send request
+        String url = BASE_URL + PAYOUT_API_PATH;
+        long timestamp = System.currentTimeMillis();
+
+        Request request = new Request.Builder()
+                .url(url)
+                .post(RequestBody.create(jsonBody, JSON_MEDIA_TYPE))
+                .addHeader("Content-Type", "application/json")
+                .addHeader("x-auth-appid", APP_ID)
+                .addHeader("X-Auth-Timestamp", String.valueOf(timestamp))
+                .addHeader("x-auth-signature", signature)
+                .build();
+
+        System.out.println("\n=== HTTP Request ===");
+        System.out.println("URL: " + url);
+        System.out.println("Headers: x-auth-appid=" + APP_ID + ", X-Auth-Timestamp=" + timestamp);
+        System.out.println("Signature: " + signature);
+
+        try (Response response = httpClient.newCall(request).execute()) {
+            String responseBody = response.body() != null ? response.body().string() : "";
+            System.out.println("\n=== HTTP Response ===");
+            System.out.println("Status: " + response.code());
+            System.out.println("Body: " + responseBody);
+        }
+
+        System.out.println("\n========== Payout Demo End ==========");
+    }
+
+
+    /**
+     * Payout API call test
+     */
+    @Test
+    public void testPayoutEWalletDemo() throws IOException {
+        System.out.println("========== Payout Demo Start ==========");
+
+        // 1. Build request parameters
+        CreatePayoutOrderDTO dto = buildEWalletPayoutRequest();
         String jsonBody = JSON.toJSONString(dto);
         System.out.println("Request Params: " + jsonBody);
 
@@ -119,6 +164,9 @@ public class PayoutExample {
         // Async callback notification URL
         dto.setNotifyUrl("https://www.example.com/payout-notify");
 
+        // Destination type: bank, ewallet, crypto_wallet
+        dto.setDestinationType("bank");
+
         dto.setWayCode("TAZAPAY_PAYOUT");
         // Payment Way (optional)
         // dto.setWayType("");
@@ -152,6 +200,79 @@ public class PayoutExample {
         detail2.setBankCountryCode("PH");
         detail2.setBankName("Hong Kong and Shanghai Banking Corp.");
         detail2.setBankSwiftCode("HSBCPH22");
+        details.add(detail2);
+
+        // Total amount = sum of detail amounts
+        dto.setTotalAmount(String.valueOf(amount1 + amount2));
+        dto.setPayoutOrderDetails(details);
+
+        return dto;
+    }
+
+    /**
+     * Build Payout request parameters
+     * Reference: Create_test_data.py
+     */
+    private CreatePayoutOrderDTO buildEWalletPayoutRequest() {
+        CreatePayoutOrderDTO dto = new CreatePayoutOrderDTO();
+
+        // Generate unique request_id using timestamp + random number
+        String requestId = "PO" + System.currentTimeMillis() + randomInt(1000, 9999);
+        dto.setRequestId(requestId);
+
+        // Currency - PHP for Philippines
+        dto.setCurrency("PHP");
+
+        // Product info
+        dto.setProductName("payout product");
+        dto.setDescription("payout product");
+
+        // Async callback notification URL
+        dto.setNotifyUrl("https://www.example.com/payout-notify");
+
+        // Destination type: bank, ewallet, crypto_wallet
+        dto.setDestinationType("ewallet");
+
+        dto.setWayCode("TAZAPAY_PAYOUT");
+        // Payment Way (optional)
+        // dto.setWayType("");
+
+        // ========== Build Payout Detail List ==========
+        List<PayoutOrderDetailDTO> details = new ArrayList<>();
+
+        // Random amounts between 100 and 500
+        int amount1 = randomInt(100, 500);
+        int amount2 = randomInt(100, 500);
+
+        // Detail 1
+        PayoutOrderDetailDTO detail1 = new PayoutOrderDetailDTO();
+        detail1.setMchOrderId("POD" + System.currentTimeMillis() + randomInt(100000, 999999));
+        detail1.setAmount(String.valueOf(amount1));
+
+        PayoutEWalletDTO ewallet = new PayoutEWalletDTO();
+        ewallet.setAccountType("individual");
+        ewallet.setAccountName("account_name_" + randomInt(1000, 9999));
+        ewallet.setProvider("GCash");
+        ewallet.setAccountNumber("09171234501");
+        ewallet.setDepositKeyType("phone");
+        ewallet.setDepositKey("09171234501");
+        detail1.setPayoutEWallet(ewallet);
+        details.add(detail1);
+
+        // Detail 2
+        PayoutOrderDetailDTO detail2 = new PayoutOrderDetailDTO();
+        detail2.setMchOrderId("POD" + System.currentTimeMillis() + randomInt(100000, 999999));
+        detail2.setAmount(String.valueOf(amount2));
+
+        PayoutEWalletDTO ewallet2 = new PayoutEWalletDTO();
+        ewallet2.setAccountType("individual");
+        ewallet2.setAccountName("account_name_" + randomInt(1000, 9999));
+        ewallet2.setProvider("GCash");
+        ewallet2.setAccountNumber("09171234502");
+        ewallet2.setDepositKeyType("phone");
+        ewallet2.setDepositKey("09171234502");
+        detail2.setPayoutEWallet(ewallet2);
+
         details.add(detail2);
 
         // Total amount = sum of detail amounts

@@ -1,4 +1,4 @@
-package com.dpe.lesspay2.demo.example;
+package com.dpe.lesspay2.demo.example.payout;
 
 import com.alibaba.fastjson.JSON;
 import com.dpe.lesspay2.demo.dto.PayoutBankDTO;

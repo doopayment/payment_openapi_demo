@@ -1,8 +1,8 @@
-package com.dpe.lesspay2.demo.example;
+package com.dpe.lesspay2.demo.example.payin;
 
 import com.alibaba.fastjson.JSON;
-import com.dpe.lesspay2.demo.dto.ChannelExtraDTO;
 import com.dpe.lesspay2.demo.dto.CreatePayinOrderDTO;
+import com.dpe.lesspay2.demo.dto.ChannelExtraDTO;
 import com.dpe.lesspay2.demo.util.SignUtil;
 import okhttp3.*;
 import org.junit.jupiter.api.Test;
@@ -13,10 +13,11 @@ import java.util.concurrent.TimeUnit;
 /**
  * Card Payment Example
  * <p>
- * Demonstrates 3 integration modes for Card Payment:
+ * Demonstrates 4 integration modes for Card Payment:
  * 1. Cashier Mode (Hosted Payment Page)
  * 2. OpenAPI Mode - Direct Card Payment (Server-to-Server)
  * 3. OpenAPI Mode - Token Payment (Server-to-Server)
+ * 4. Payment Session Mode (Checkout.com Payment Session)
  */
 public class CardPaymentExample {
 
@@ -116,6 +117,30 @@ public class CardPaymentExample {
         executeCreateOrder(dto);
 
         System.out.println("\n========== Card Payment - OpenAPI Token Payment Demo End ==========");
+    }
+
+    /**
+     * Mode 4: Payment Session Mode
+     * Creates a payment session via Checkout.com. The response contains
+     * payment_session_token and payment_session_secret for rendering
+     * the hosted checkout on the merchant's frontend.
+     */
+    @Test
+    public void testPaymentSessionMode() throws IOException {
+        System.out.println("========== Card Payment - Payment Session Mode Demo Start ==========");
+
+        CreatePayinOrderDTO dto = buildBaseOrderRequest();
+
+        dto.setPayAccessType(1);
+        dto.setWayCode("CHECKOUT_CARDPAYMENT");
+        dto.setTargetAmount("300.00");
+        dto.setTargetCurrency("USD");
+        dto.setUseChannelRequestId(true);
+        dto.setExpiredTime(1209570);
+
+        executeCreateOrder(dto);
+
+        System.out.println("\n========== Card Payment - Payment Session Mode Demo End ==========");
     }
 
     /**
